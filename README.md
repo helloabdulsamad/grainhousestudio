@@ -20,6 +20,7 @@ Fraunces and Hanken Grotesk, both under the SIL Open Font License.
 |---|---|
 | index.html | The whole page, with the photo data inside |
 | media/q | Large photos, four to a file, 960 px each |
+| media/m | Photos for result cards, eight to a file, 480 px each |
 | media/t | Small photos for the grid, 64 to a file |
 | fonts | The two web fonts |
 | licence-log.csv | Source, photographer and licence of every photo |
