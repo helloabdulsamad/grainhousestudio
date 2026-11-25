@@ -121,8 +121,14 @@ box-shadow:0 18px 50px rgba(21,17,13,.16),0 0 0 1px rgba(21,17,13,.04);padding:1
 .tabs{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px}
 .tabs button{border-radius:999px;padding:8px 16px;font-size:13.5px;font-weight:500}
 .tabs button[aria-selected=true]{background:var(--soot);color:var(--sawdust)}
-.summary{max-width:1240px;margin:0 auto 20px;display:flex;flex-wrap:wrap;gap:6px}
-.summary span{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--paper)}
+.answers{max-width:1240px;margin:0 auto 20px;display:flex;flex-wrap:wrap;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.answers:empty{display:none}
+.ans{flex:1 1 170px;min-width:0;background:var(--paper);display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:13px 16px 12px;text-align:left;transition:background .25s}
+button.ans:hover{background:#fff}
+.ans-l{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--iroko)}
+.ans-v{font:400 17px/1.25 var(--serif);font-variation-settings:"SOFT" 100;display:flex;align-items:center;gap:8px}
+.ans-v i{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(21,17,13,.18)}
+.ans-e{font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;margin-top:2px}
 .grid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
 .cardi{background:var(--paper);border-radius:18px;overflow:hidden;text-align:left;display:flex;flex-direction:column;box-shadow:0 0 0 1px rgba(21,17,13,.05);
 transition:transform .5s var(--ease),box-shadow .3s;opacity:0;transform:translateY(16px);animation:rise .7s var(--ease) forwards}
@@ -193,7 +199,8 @@ dialog{overflow:visible;margin:auto}
 .req input,.req textarea{font:inherit;font-weight:400;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--soot)}
 .req-pieces{display:flex;flex-wrap:wrap;gap:8px}
 .req-pieces .ph{position:relative;width:60px;height:60px;border-radius:10px;overflow:hidden;background:var(--line)}
-.req .summary{margin:0}
+.req .answers{margin:0}
+.req .ans-v{font-size:15px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #toast{position:fixed;inset:auto auto 24px 50%;transform:translateX(-50%);margin:0;border:0;z-index:60;background:var(--soot);color:var(--sawdust);padding:10px 16px;border-radius:999px;font-size:13px;max-width:calc(100vw - 32px);width:max-content;height:auto;overflow:visible;opacity:0;transition:opacity .3s;pointer-events:none}
 #toast.on{opacity:1}
@@ -217,6 +224,8 @@ dialog{overflow:visible;margin:auto}
  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
  .cardi .meta{flex-direction:column;gap:2px;padding:10px 11px 11px}
  .cardi .by{padding:0 11px 11px}
+ .ans{flex-basis:140px;padding:11px 13px 10px}
+ .ans-v{font-size:15.5px}
 }
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;transition-delay:0s!important}
@@ -272,7 +281,7 @@ dialog{overflow:visible;margin:auto}
    <button role="tab" aria-selected="false" id="tabAll">All pieces</button>
   </div>
  </div>
- <div class="summary" id="summary"></div>
+ <div class="answers" id="summary" aria-label="Your answers"></div>
  <div class="res-acts">
   <button class="go" id="waBtn">Send my matches on WhatsApp</button>
   <button class="go ghost" id="shareBtn">Share link</button>
@@ -292,7 +301,7 @@ dialog{overflow:visible;margin:auto}
 
 <dialog id="reqDlg"><button class="x" data-close aria-label="Close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 3 10 10M13 3 3 13"/></svg></button><form class="req" id="reqForm"><h3>Request a piece</h3>
 <p class="why">Tell the studio what you need. Your answers and the pieces you picked are already in the brief.</p>
-<div class="req-pieces" id="reqPieces"></div><p class="why" id="reqPieceTxt"></p><div class="summary" id="reqAns"></div>
+<div class="req-pieces" id="reqPieces"></div><p class="why" id="reqPieceTxt"></p><div class="answers" id="reqAns" aria-label="Your answers"></div>
 <div class="two"><label>Your name<input name="name" autocomplete="name"></label><label>City<input name="city" list="cities" autocomplete="address-level2"></label></div>
 <datalist id="cities"><option>Lagos</option><option>Abuja</option><option>Port Harcourt</option><option>Ibadan</option><option>Kano</option><option>Enugu</option><option>Benin City</option></datalist>
 <div class="two"><label>Rough size<input name="size" placeholder="For example 180 by 90 cm"></label><label>Needed by<input name="date" type="date"></label></div>
@@ -438,9 +447,23 @@ function showResults(){hideTip();const p=$('#prep');stopPrep=ring($('#prepRing')
  setTimeout(()=>{renderResults();$('#res').classList.add('on');$('#card').classList.add('off');p.classList.remove('on');setTimeout(()=>stopPrep&&stopPrep(),600);$('#res').scrollTop=0},RM?200:1700)}
 function chosenText(){const out=[];if(S.cats.size)out.push([...S.cats].map(k=>CATS[k][0]).join(', '));if(S.rooms.size)out.push([...S.rooms].map(k=>RL[k]).join(', '));
  ['tone','size','mood'].forEach(k=>{if(S[k]!==null)out.push(Q.find(q=>q.k===k).lab(S[k]))});if(S.use)out.push(S.use==='d'?'Daily use':'For show');return out}
+const TONES=['#EBD7B6','#C79A64','#7A4A26','#2E1A0E'];
+function toneColour(v){const x=Math.min(.999,Math.max(0,v))*(TONES.length-1),k=Math.floor(x),f=x-k,a=TONES[k],b=TONES[k+1];
+ const c=n=>Math.round(parseInt(a.substr(n,2),16)*(1-f)+parseInt(b.substr(n,2),16)*f).toString(16).padStart(2,'0');return '#'+c(1)+c(3)+c(5)}
+function answerItems(){const out=[],lab=k=>Q.find(q=>q.k===k).lab;
+ if(S.cats.size)out.push([0,'Type',[...S.cats].map(k=>CATS[k][0]).join(', ')]);
+ if(S.rooms.size)out.push([1,'Room',[...S.rooms].map(k=>RL[k]).join(', ')]);
+ if(S.tone!==null)out.push([2,'Wood tone',lab('tone')(S.tone),toneColour(S.tone)]);
+ if(S.size!==null)out.push([3,'Size',lab('size')(S.size)]);
+ if(S.mood!==null)out.push([4,'Feel of the room',lab('mood')(S.mood)]);
+ if(S.use)out.push([5,'Use',S.use==='d'?'Daily use':'For show']);return out}
+function renderAnswers(el,edit){const items=answerItems();
+ el.innerHTML=items.map(([n,l,v,sw])=>(edit?'<button class="ans" data-step="'+n+'" aria-label="'+l+', '+v+'. Change this answer">':'<div class="ans">')+'<span class="ans-l">'+l+'</span><span class="ans-v">'+(sw?'<i style="background:'+sw+'"></i>':'')+v+'</span>'+(edit?'<span class="ans-e">Change</span></button>':'</div>')).join('')
+  ||(edit?'':'<div class="ans"><span class="ans-l">Answers</span><span class="ans-v">None yet</span></div>');
+ if(edit)el.querySelectorAll('.ans').forEach(b=>b.onclick=()=>{$('#res').classList.remove('on');$('#card').classList.remove('off');go(+b.dataset.step)})}
 function renderResults(){const R=ranked();const best=R.filter(r=>r.s>=.6).slice(0,24);const list=tab==='best'?(best.length?best:R.slice(0,12)):R;
  const ch=chosenText();$('#resSub').textContent=anyAnswer()?best.length+' pieces match most of what you chose. Tap any piece to see why.':'You skipped every question, so here is everything. Go back to narrow it down.';
- $('#summary').innerHTML=ch.map(t=>'<span>'+t+'</span>').join('');$('#tabBest').textContent='Best matches ('+(best.length||Math.min(12,N))+')';$('#tabAll').textContent='All pieces ('+N+')';
+ renderAnswers($('#summary'),true);$('#tabBest').textContent='Best matches ('+(best.length||Math.min(12,N))+')';$('#tabAll').textContent='All pieces ('+N+')';
  const g=$('#grid');if(midIO)g.querySelectorAll('.md').forEach(e=>midIO.unobserve(e));g.innerHTML='';list.forEach((r,k)=>{const d=D[r.i];const b=document.createElement('div');b.className='cardi';b.style.animationDelay=RM?'0s':Math.min(k*35,700)+'ms';const nm=CATS[d[0]][0];
   b.innerHTML='<button class="open"><div class="ph">'+(k<3&&anyAnswer()&&r.s>=.6?'<span class="badge">Best match</span>':'')+'</div><div class="meta"><b>'+nm+'</b>'+(anyAnswer()?'<em>'+Math.round(r.s*100)+'% match</em>':'')+'</div></button>'
    +'<button class="heart" data-i="'+r.i+'" aria-pressed="'+LIST.includes(r.i)+'" aria-label="Save '+nm+' to your shortlist">'+HEART+'</button>';
@@ -571,7 +594,7 @@ $('#lReq').onclick=()=>openReq(LIST.slice());
 let reqIds=[];
 function openReq(ids){reqIds=ids;const box=$('#reqPieces');box.innerHTML='';ids.forEach(i=>{const s=document.createElement('div');s.className='ph';s.title=code(i);s.appendChild(thumbBox(i));box.appendChild(s)});
  $('#reqPieceTxt').textContent=ids.map(i=>code(i)+', '+CATS[D[i][0]][0]).join('. ')+'.';
- $('#reqAns').innerHTML=(chosenText().map(t=>'<span>'+t+'</span>').join(''))||'<span>No answers yet</span>';
+ renderAnswers($('#reqAns'),false);
  const f=$('#reqForm').elements,keep=store.get('gh-req',{});['name','city'].forEach(k=>{if(keep[k]&&!f[k].value)f[k].value=keep[k]});
  const d=$('#reqDlg');if(!d.open)d.showModal()}
 function naira(t){const n=t.replace(/[^\d]/g,'');return /^\d+$/.test(t.replace(/[\s,₦]/g,''))&&n?'₦'+Number(n).toLocaleString('en-NG'):t}
