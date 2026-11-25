@@ -2,7 +2,7 @@
 
 A woodwork finder. You answer six short questions and 1,026 photos of real wood pieces sort themselves around you, so the closest matches come to the front.
 
-Live page: https://helloabdulsamad.github.io/grainhouse/
+Live page: https://helloabdulsamad.github.io/grainhousestudio/
 
 ## Photos
 
