@@ -469,8 +469,8 @@ const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(3,'0');
 // large photos are packed four to a file, 2 by 2 cells of 960 px. Result cards use media/m, 8 to a file, 2 by 4 cells of 480 px
 /* one file per photo: media/s is 720 px for cards and phones, media/l is 1200 px for the open photo */
-// on the live site and on this computer the photos sit next to the page. Anywhere else, such as the review link, they come from the live site
-const MB=/(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)?'':'https://helloabdulsamad.github.io/grainhousestudio/';
+// on the live site and on this computer the photos sit next to the page. Anywhere else, such as the review link, they come from grainhouse.seeitlive.store
+const MB=/^grainhouse\.seeitlive\.store$|(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)?'':'https://grainhouse.seeitlive.store/';
 const IS={};function iLoad(i,z){const u=MB+'media/'+z+'/'+String(i).padStart(4,'0')+'.webp';return IS[u]||(IS[u]=new Promise(r=>{const im=new Image();im.onload=()=>r(u);im.onerror=()=>{delete IS[u];r(null)};im.src=u}))}
 // if a photo from the live site is blocked, fall back to the old four photo file that sits next to the page
 function oldQ(i){const u='media/q/'+String(i>>2).padStart(3,'0')+'.webp';return IS[u]||(IS[u]=new Promise(r=>{const im=new Image();im.onload=()=>r(u);im.onerror=()=>r(null);im.src=u}))}
