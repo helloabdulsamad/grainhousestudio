@@ -2,7 +2,7 @@
 
 A woodwork finder. You pick a type, a room, a wood tone or a size, and photos of real wood pieces sort themselves around you, so the closest matches come to the front. It has a light and a dark theme.
 
-Live page: https://helloabdulsamad.github.io/grainhousestudio/
+Live page: https://grainhouse.seeitlive.store/
 
 ## Photos
 
