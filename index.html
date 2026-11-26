@@ -222,10 +222,15 @@ dialog{overflow:visible;margin:auto}
 #detail{overflow:hidden}
 .fly{position:fixed;z-index:5;margin:0;padding:0;border:0;inset:auto;overflow:hidden;background:var(--line);box-shadow:0 20px 50px rgba(0,0,0,.25)}
 .fly .th{position:absolute;left:0;top:50%;width:100%;height:auto;aspect-ratio:1;translate:0 -50%}
-.dt{display:grid;grid-template-columns:1.1fr 1fr}
+.dt{display:grid;grid-template-columns:1.55fr 1fr}
 .dt .ph{position:relative;overflow:hidden;aspect-ratio:1;background:var(--line)}
 /* the small photo the page already has sits under the big one, so the dialog never opens grey */
 .dt .ph .th{position:absolute;left:0;top:50%;width:100%;height:auto;aspect-ratio:1;translate:0 -50%}
+/* the photo fills its box whatever the box shape, cropped from the middle */
+.dt .ph .th,.dt .ph .lgx,.fly .th,.fly .lgx{left:50%;top:50%;inset:auto;left:50%;top:50%;width:auto;height:auto;min-width:100%;min-height:100%;aspect-ratio:1;translate:-50% -50%}
+/* the dialog keeps only the rooms, the name, the match and the buttons */
+#dWhy,#dCode,#dBy{display:none}
+.dt .tx{justify-content:center}
 .dt .tx{padding:28px 26px;display:flex;flex-direction:column;gap:12px}
 .dt h3{font:400 30px/1.1 var(--serif);font-variation-settings:"SOFT" 100}
 .dt .m{font-weight:600;color:var(--moss)}
@@ -290,7 +295,9 @@ dialog{overflow:visible;margin:auto}
  .c-title h2{font-size:19px}
  .chips{max-height:150px}
  .dt{grid-template-columns:1fr}
- .dt .ph{aspect-ratio:4/3}
+ .dt .ph{aspect-ratio:auto;height:min(118vw,calc(100dvh - 250px))}
+ .dt .tx{padding:18px 20px 20px;gap:8px}
+ .dt h3{font-size:26px}
  #res{padding:74px 14px 40px}
  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
  .cardi .meta{flex-direction:column;gap:2px;padding:10px 11px 11px}
