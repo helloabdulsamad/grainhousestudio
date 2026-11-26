@@ -224,6 +224,8 @@ dialog{overflow:visible;margin:auto}
 .fly .th{position:absolute;left:0;top:50%;width:100%;height:auto;aspect-ratio:1;translate:0 -50%}
 .dt{display:grid;grid-template-columns:1.1fr 1fr}
 .dt .ph{position:relative;overflow:hidden;aspect-ratio:1;background:var(--line)}
+/* the small photo the page already has sits under the big one, so the dialog never opens grey */
+.dt .ph .th{position:absolute;left:0;top:50%;width:100%;height:auto;aspect-ratio:1;translate:0 -50%}
 .dt .tx{padding:28px 26px;display:flex;flex-direction:column;gap:12px}
 .dt h3{font:400 30px/1.1 var(--serif);font-variation-settings:"SOFT" 100}
 .dt .m{font-weight:600;color:var(--moss)}
@@ -453,7 +455,7 @@ function ranked(){return [...Array(N).keys()].map(i=>({i,s:score(i)})).sort((a,b
 /* tiles */
 const stage=$('#stage');const tiles=[];
 D.forEach((d,i)=>{const el=document.createElement('button');el.className='tile';el.setAttribute('aria-label',CATS[d[0]][0]+', open details');
- el.appendChild(thumbEl(i));el.onclick=()=>openDetail(i,el);el.onmouseenter=e=>showTip(i,el);el.onmouseleave=hideTip;el.onfocus=()=>showTip(i,el);el.onblur=hideTip;
+ el.appendChild(thumbEl(i));el.onclick=()=>openDetail(i,el);el.onpointerdown=()=>{if(!SAVE)qLoad(i>>2)};el.onmouseenter=e=>showTip(i,el);el.onmouseleave=hideTip;el.onfocus=()=>showTip(i,el);el.onblur=hideTip;
  stage.appendChild(el);tiles.push({el,x:0,y:0,s:0,o:0})});
 function place(i,x,y,size,o,delay){const t=tiles[i],sc=size/220;t.x=x;t.y=y;t.s=size;
  t.el.style.transitionDelay=RM?'0s':delay+'ms';t.el.style.transform=`translate(${x}px,${y}px) scale(${sc})`;
@@ -524,7 +526,7 @@ $('#restartBtn').onclick=restart;$('#restartTop').onclick=restart;
 /* detail */
 const why={fam:'It is one of the types you picked',room:'It suits the rooms you picked',wood:'The wood tone is close to your choice',size:'The size is in the range you picked'};
 let dSrc=null,dIdx=0,dBusy=false;
-function openDetail(i,src){if(dBusy)return;if(PN){closePanel();return}hideTip();dSrc=src||null;dIdx=i;const d=D[i],C=CATS[d[0]];const cr=cred(d);$('#dPh').replaceChildren(SAVE?midEl(i,C[0]):lgEl(i,C[0],true));
+function openDetail(i,src){if(dBusy)return;if(PN){closePanel();return}hideTip();dSrc=src||null;dIdx=i;const d=D[i],C=CATS[d[0]];const cr=cred(d);$('#dPh').replaceChildren(thumbEl(i),SAVE?midEl(i,C[0]):lgEl(i,C[0],true));
  $('#dCat').textContent=C[0];$('#dRoom').textContent=C[1].map(r=>RL[r]).join(', ');
  const p=parts(i);$('#dMatch').textContent=anyAnswer()?Math.round(score(i)*100)+'% match':'Pick a filter to see the match';
  $('#dWhy').innerHTML=Object.keys(p).filter(k=>p[k]>=.6).map(k=>'<li>'+why[k]+'</li>').join('');
@@ -652,7 +654,7 @@ $('#reqForm').onsubmit=e=>{e.preventDefault();wa(briefText())};
 $('#reqCopy').onclick=async()=>{const t=briefText();try{await navigator.clipboard.writeText(t);toast('Brief copied. Paste it into an email or a chat.')}catch(e){toast('Copy did not work in this browser.')}};
 $('#dSave').onclick=()=>toggleList(dIdx);
 $('#dReq').onclick=()=>openReq([dIdx]);
-$('#dFull').onclick=()=>{$('#dPh').replaceChildren(lgEl(dIdx,CATS[D[dIdx][0]][0],true));$('#dFull').classList.add('hide')};
+$('#dFull').onclick=()=>{$('#dPh').replaceChildren(thumbEl(dIdx),lgEl(dIdx,CATS[D[dIdx][0]][0],true));$('#dFull').classList.add('hide')};
 
 /* data saver */
 function showSave(){const b=$('#saverBtn');b.setAttribute('aria-pressed',SAVE);b.querySelector('.lab').textContent=SAVE?'Data saver on':'Data saver'}
