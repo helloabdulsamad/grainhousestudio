@@ -154,6 +154,35 @@ opacity:0;pointer-events:none;transition:opacity .4s var(--e) .45s}
 .tag{height:31px;display:inline-flex;align-items:center;padding:0 12px;background:var(--bg);border:1px solid var(--line);border-radius:5px;font-size:12px;white-space:nowrap}
 button.tag{text-decoration:underline;text-underline-offset:3px}
 
+/* piece dialog, kept as it was before the Vitra rebuild */
+@font-face{font-family:"Fraunces";src:url(fonts/fraunces-latin-full-normal.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Hanken Grotesk";src:url(fonts/hanken-grotesk-latin-wght-normal.woff2) format("woff2");font-weight:100 900;font-display:swap}
+#detail{border-radius:22px;background:#FBF7F1;color:#15110D;max-width:min(860px,calc(100vw - 24px));box-shadow:0 30px 80px rgba(0,0,0,.3);overflow:hidden;font:15px/1.45 "Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
+#detail[open]{animation:none}
+#detail::backdrop{background:rgba(21,17,13,.55);backdrop-filter:blur(3px)}
+#detail[open]::backdrop{animation:bdIn .6s cubic-bezier(.16,1,.3,1)}
+#detail.closing::backdrop{opacity:0;transition:opacity .5s}
+@keyframes bdIn{from{opacity:0}}
+.fly{position:fixed;z-index:5;margin:0;padding:0;border:0;inset:auto;overflow:hidden;background:#E2D7C6;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.fly .th,.fly .lgx{position:absolute;inset:0;width:100%;height:100%}
+.lq{background-size:201.25% 201.25%}
+.dt{display:grid;grid-template-columns:1.1fr 1fr;max-height:calc(100dvh - 24px);overflow-y:auto}
+.dt .dph{position:relative;overflow:hidden;aspect-ratio:1;background:#E2D7C6}
+.dt .dph .lgx{inset:auto;left:0;top:50%;width:100%;height:auto;aspect-ratio:1;translate:0 -50%}
+.dt .tx{padding:28px 26px;display:flex;flex-direction:column;gap:12px}
+.dt .eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#A8652A}
+.dt h3{font:400 30px/1.1 "Fraunces",Georgia,"Times New Roman",serif;font-variation-settings:"SOFT" 100}
+.dt .why{font-size:13.5px;color:#6E5E4E}
+.dt .why li{margin-left:18px;margin-bottom:3px}
+.dx{position:absolute;right:12px;top:12px;z-index:2;width:36px;height:36px;border-radius:50%;background:#FBF7F1;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.d-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.og{background:#15110D;color:#F4EDE2;border-radius:999px;padding:10px 16px;font-weight:600;font-size:13.5px}
+.og:hover{background:#4A3222}
+.og.ghost{background:transparent;color:#15110D;border:1px solid #E2D7C6}
+.og.ghost:hover{border-color:#15110D;background:transparent}
+#dSave[aria-pressed=true]{background:#A8652A}
+@media (max-width:700px){.dt{grid-template-columns:1fr}.dt .dph{aspect-ratio:4/3}}
+
 /* one hover for every control, as on the reference */
 @media (hover:hover) and (pointer:fine){
  .bar button:hover,.pc:hover,.zoom button:hover,.btn:hover,.xr:hover,.go:hover:not(:disabled),.ic:hover,#back:hover,.dialog-x:hover,#startBtn:hover{color:#fff;background:var(--red);border-color:var(--redb)}
@@ -265,16 +294,7 @@ dialog[open]{animation:dIn .45s var(--out)}
 </div>
 <div class="zoom" id="zoom"><button id="zOut" aria-label="Zoom out"><svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M1 6h10"/></svg></button><i></i><button id="zIn" aria-label="Zoom in"><svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M1 6h10M6 1v10"/></svg></button></div>
 
-<section id="info" aria-live="polite">
- <p class="by ii" id="iCode"></p>
- <h2 class="ii" id="iTitle"></h2>
- <div class="acts ii">
-  <button class="btn" id="iSave" aria-pressed="false" aria-label="Save to shortlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20.5s-7.5-4.4-9.4-9.1C1.3 8.1 3.4 4.5 6.9 4.5c2.1 0 3.6 1.2 5.1 3 1.5-1.8 3-3 5.1-3 3.5 0 5.6 3.6 4.3 6.9-1.9 4.7-9.4 9.1-9.4 9.1z"/></svg></button>
-  <button class="xr" id="iClose" aria-label="Close"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m3 3 10 10M13 3 3 13"/></svg></button>
-  <button class="btn buy" id="iReq">Request</button>
- </div>
- <div class="tags ii" id="iTags"></div>
-</section>
+<dialog id="detail"><button class="dx" data-close aria-label="Close"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 3 10 10M13 3 3 13"/></svg></button><div class="dt"><div class="dph" id="dPh"></div><div class="tx"><div class="eyebrow" id="dRoom"></div><h3 id="dCat"></h3><ul class="why" id="dWhy"></ul><div class="d-acts"><button class="og" id="dSave" aria-pressed="false">Save to shortlist</button><button class="og ghost" id="dReq">Request this piece</button><button class="og ghost hide" id="dFull">Show full quality photo</button></div><p class="why" id="dCode"></p></div></div></dialog>
 
 <dialog id="listDlg"><button class="dialog-x" data-close aria-label="Close"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 3 10 10M13 3 3 13"/></svg></button><div class="lst"><h3>Your shortlist</h3><p class="why" id="listSub"></p><div class="lgrid" id="lGrid"></div><div class="cmp hide" id="cmp" aria-live="polite"></div>
 <div class="l-acts"><button class="go" id="cmpBtn" disabled>Compare</button><button class="go pri" id="lWa">Send on WhatsApp</button><button class="go" id="lShare">Share link</button><button class="go" id="lReq">Request these pieces</button></div></div></dialog>
@@ -444,7 +464,7 @@ $('#dial').addEventListener('pointermove',e=>{if(dk)setKnob(dk,dialVal(e))});
 
 function fitPanels(){const w=innerWidth,p=$('#panel');p.style.setProperty('--k',Math.min(1,(w-12)/472));p.style.setProperty('--k2',Math.min(1,(w-8)/371));placePyr('type');placePyr('room')}
 let pBusy=0,pT=0;
-function openPanel(p){if(!READY||Date.now()<pBusy)return;if(DI>=0)closeDetail();clearTimeout(pT);
+function openPanel(p){if(!READY||Date.now()<pBusy)return;clearTimeout(pT);
  document.querySelectorAll('.sub').forEach(s=>s.classList.toggle('on',s.dataset.p===p));$('#back').classList.toggle('red',p==='size');
  if(p==='size')drawDial();PN=p;void document.body.offsetWidth;document.body.classList.add('pOpen');pBusy=Date.now()+600;
  setTimeout(()=>{if(PN===p&&document.activeElement&&document.activeElement.closest('.bar'))$('#back').focus({preventScroll:true})},500)}
@@ -465,33 +485,44 @@ function renderActive(){const out=[];
  $('.bar [data-p="type"]').classList.toggle('has',F.fam.size>0);$('.bar [data-p="room"]').classList.toggle('has',F.room.size>0);
  $('.bar [data-p="wood"]').classList.toggle('has',F.wood.size>0);$('.bar [data-p="size"]').classList.toggle('has',sizeOn())}
 
-/* a piece up close: it moves to the middle and grows, the rest shrink and move away */
-function tapItem(i){if(moved)return;if(PN){closePanel();return}if(DI>=0){closeDetail();return}openDetail(i)}
-function hiRes(it){if(it.ph.querySelector('.hi'))return;const h=document.createElement('i');h.className='hi';const i=it.i,r=i&7;
- h.style.backgroundPosition=(r&1?'100%':'0%')+' '+((r>>1)/3*100)+'%';const u='media/m/'+pad(i>>3)+'.webp',im=new Image();
- im.onload=()=>{h.style.backgroundImage='url('+u+')';requestAnimationFrame(()=>h.classList.add('ok'))};im.src=u;it.ph.appendChild(h)}
-let dT2=0;
-function openDetail(i){const it=IT[i],w=innerWidth,h=innerHeight,ph=phone();cancelAnimationFrame(glide);clearTimeout(dT2);DI=i;
- const S=ph?Math.min(260,w*.64,h*.36):Math.min(352,h*.44),ty=ph?h*.27:h*.34;
- const wx=(w/2-V.cx-V.px)/V.z,wy=(ty-V.cy-V.py)/V.z,push=(S*.62+40)/V.z,below=(ph?250:200)/V.z;
- it.el.classList.add('sel');it.el.style.transition='transform 1.1s var(--io)';it.el.style.transform='translate('+wx+'px,'+wy+'px) scale('+(S/V.z/BOX)+')';
- IT.forEach(o=>{if(o===it||!o.on)return;const dx=o.x-wx,dy=o.y-wy,L=Math.hypot(dx,dy)||1;
-  const extra=dy>0?below*Math.max(0,1-Math.abs(dx)/(S*1.6/V.z)):0;
-  o.el.style.transition='transform 1.1s var(--io)';o.el.style.transform='translate('+(o.x+dx/L*push)+'px,'+(o.y+dy/L*push+extra)+'px) scale('+(o.s*.65/BOX)+')'});
- if(!SAVE)hiRes(it);
- const d=D[i],C=CATS[d[0]];$('#iCode').textContent=code(i);$('#iTitle').textContent=C[0];
- const tags=C[1].map(r=>RL[r]).concat([TN[bucket(d[3])],sizeLab(C[2]),useLab[C[3]]]);
- $('#iTags').innerHTML=tags.map(t=>'<span class="tag">'+t+'</span>').join('')+(SAVE?'<button class="tag" id="iFull">Show full quality photo</button>':'');
- if(SAVE)$('#iFull').onclick=e=>{hiRes(it);e.currentTarget.remove()};
- updSave();const inf=$('#info');inf.style.top=(ty+S/2+(ph?16:24))+'px';
- inf.querySelectorAll('.ii').forEach((e,k)=>e.style.setProperty('--d',(RM?0:520+k*70)+'ms'));
- document.body.classList.add('detail');setTimeout(()=>{if(DI===i)$('#iClose').focus({preventScroll:true})},700)}
-function closeDetail(){if(DI<0)return;const it=IT[DI];DI=-1;document.body.classList.remove('detail');
- IT.forEach(o=>{if(o.on){o.el.style.transition='transform 1.1s var(--io)';setT(o)}});
- dT2=setTimeout(()=>{it.el.classList.remove('sel');const hi=it.ph.querySelector('.hi');hi&&hi.remove();IT.forEach(o=>o.el.style.transition='')},1150);
- it.on&&it.el.focus({preventScroll:true})}
-$('#iClose').onclick=closeDetail;
-addEventListener('keydown',e=>{if(e.key!=='Escape'||document.querySelector('dialog[open]'))return;if(DI>=0)closeDetail();else if(PN)closePanel()});
+/* a piece up close, in the dialog as it was before */
+function tapItem(i){if(moved)return;if(PN){closePanel();return}openDetail(i,IT[i].el)}
+const QS={};function qLoad(k){return QS[k]||(QS[k]=new Promise(r=>{const im=new Image();im.onload=im.onerror=()=>r();im.src='media/q/'+pad(k)+'.webp'}))}
+function lgEl(i,alt){const e=document.createElement('i');e.className='lgx lq';e.setAttribute('role','img');e.setAttribute('aria-label',alt||'');const c=i&3,k=i>>2;
+ e.style.backgroundPosition=(c&1?'100%':'0%')+' '+(c&2?'100%':'0%');qLoad(k).then(()=>{e.style.backgroundImage='url(media/q/'+pad(k)+'.webp)';e.classList.add('ok')});return e}
+const why={fam:'It is one of the types you picked',room:'It suits the rooms you picked',wood:'The wood tone is one you picked',size:'The size is in the range you picked'};
+let dSrc=null,dBusy=false;
+function openDetail(i,src){if(dBusy)return;cancelAnimationFrame(glide);dSrc=src||null;DI=i;const d=D[i],C=CATS[d[0]];
+ $('#dPh').replaceChildren(SAVE?midEl(i,C[0]):lgEl(i,C[0]));$('#dCat').textContent=C[0];$('#dRoom').textContent=C[1].map(r=>RL[r]).join(', ');
+ const w=[];if(F.fam.size)w.push(why.fam);if(F.room.size)w.push(why.room);if(F.wood.size)w.push(why.wood);if(sizeOn())w.push(why.size);
+ $('#dWhy').innerHTML=w.map(t=>'<li>'+t+'</li>').join('');$('#dCode').textContent=code(i)+'. Quote this number when you ask about it.';$('#dFull').classList.toggle('hide',!SAVE);updSave();
+ const dlg=$('#detail');dlg.showModal();if(RM||!dSrc)return;
+ // grow the panel out of the tile and fly the photo from the tile to its place
+ dBusy=true;const from=dSrc.getBoundingClientRect(),ph=dlg.querySelector('.dph'),to=ph.getBoundingClientRect(),box=dlg.getBoundingClientRect();
+ const fly=flyer(i);mount(fly,dlg);ph.style.visibility='hidden';dSrc.style.visibility='hidden';
+ const E={duration:720,easing:'cubic-bezier(.16,1,.3,1)',fill:'both'};
+ fly.animate([rectKF(from,6),rectKF(to,0)],E);
+ dlg.animate([{clipPath:insetOf(from,box,6)},{clipPath:'inset(0 0 0 0 round 22px)'}],E);
+ dlg.querySelector('.tx').animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{...E,duration:560,delay:220});
+ setTimeout(()=>{ph.style.visibility='';fly.remove();dlg.getAnimations().forEach(a=>a.cancel());dBusy=false},740)}
+function flyer(i){const f=document.createElement('div');f.className='fly';f.appendChild(thumbEl(i));if(!SAVE)f.appendChild(lgEl(i,''));return f}
+function mount(f,dlg){if(f.showPopover){f.popover='manual';document.body.appendChild(f);f.showPopover()}else dlg.appendChild(f)}
+function rectKF(r,rad){return{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',borderRadius:rad+'px'}}
+function insetOf(r,b,rad){const c=v=>Math.max(0,v)+'px';return 'inset('+c(r.top-b.top)+' '+c(b.right-r.right)+' '+c(b.bottom-r.bottom)+' '+c(r.left-b.left)+' round '+rad+'px)'}
+function closeDetail(){const dlg=$('#detail');if(dBusy||!dlg.open)return;const src=dSrc;dSrc=null;
+ const fin=()=>{if(src)src.style.visibility='';dlg.close();DI=-1;dBusy=false};
+ if(RM||!src||!src.isConnected||src.style.display==='none'){fin();return}
+ const from=src.getBoundingClientRect();if(!(from.width>4&&from.bottom>0&&from.top<innerHeight&&from.right>0&&from.left<innerWidth)){fin();return}
+ dBusy=true;const ph=dlg.querySelector('.dph'),to=ph.getBoundingClientRect(),box=dlg.getBoundingClientRect();
+ const fly=flyer(DI);mount(fly,dlg);ph.style.visibility='hidden';
+ const E={duration:560,easing:'cubic-bezier(.7,0,.2,1)',fill:'both'};
+ dlg.querySelector('.tx').animate([{opacity:1},{opacity:0}],{duration:200,fill:'both'});
+ fly.animate([rectKF(to,0),rectKF(from,6)],E);
+ const a=dlg.animate([{clipPath:'inset(0 0 0 0 round 22px)'},{clipPath:insetOf(from,box,6)}],E);
+ dlg.classList.add('closing');
+ a.onfinish=()=>{fin();fly.remove();ph.style.visibility='';dlg.classList.remove('closing');dlg.getAnimations({subtree:true}).forEach(x=>x.cancel())}}
+$('#detail').addEventListener('cancel',e=>{e.preventDefault();closeDetail()});
+addEventListener('keydown',e=>{if(e.key!=='Escape'||document.querySelector('dialog[open]'))return;if(PN)closePanel()});
 
 /* welcome */
 function welcome(){measure();V.z=ZL[zi];setWorld(false);const w=innerWidth,h=innerHeight,ph=phone(),sz=ph?112:213;
@@ -529,11 +560,12 @@ const toastEl=document.createElement('div');toastEl.id='toast';toastEl.setAttrib
 function toast(m){toastEl.textContent=m;if(toastEl.showPopover){toastEl.popover='manual';try{toastEl.hidePopover()}catch(e){}try{toastEl.showPopover()}catch(e){}}
  requestAnimationFrame(()=>requestAnimationFrame(()=>toastEl.classList.add('on')));clearTimeout(tT);tT=setTimeout(()=>{toastEl.classList.remove('on');setTimeout(()=>{try{toastEl.hidePopover&&toastEl.hidePopover()}catch(e){}},320)},2600)}
 
-function updSave(){const on=DI>=0&&LIST.includes(DI),b=$('#iSave');b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',on?'Saved to shortlist. Remove it':'Save to shortlist')}
+function updSave(){const on=DI>=0&&LIST.includes(DI),b=$('#dSave');b.setAttribute('aria-pressed',on);b.textContent=on?'Saved to shortlist':'Save to shortlist'}
 function saveList(){store.set('gh-list',LIST);$('#listN').textContent=LIST.length||'';updSave()}
 function toggleList(i){const k=LIST.indexOf(i);k<0?LIST.push(i):LIST.splice(k,1);saveList();toast(k<0?'Saved to your shortlist':'Removed from your shortlist')}
-$('#iSave').onclick=()=>DI>=0&&toggleList(DI);
-$('#iReq').onclick=()=>DI>=0&&openReq([DI]);
+$('#dSave').onclick=()=>DI>=0&&toggleList(DI);
+$('#dReq').onclick=()=>DI>=0&&openReq([DI]);
+$('#dFull').onclick=()=>{$('#dPh').replaceChildren(lgEl(DI,CATS[D[DI][0]][0]));$('#dFull').classList.add('hide')};
 
 // the filters and the shortlist live in the link, so a shared link opens the same view with no account
 function hashOf(ids){const p=new URLSearchParams();if(F.fam.size)p.set('c',[...F.fam].join('.'));if(F.room.size)p.set('r',[...F.room].join('.'));
@@ -585,7 +617,7 @@ $('#lWa').onclick=()=>wa('Hello Grainhouse. This is my shortlist from the finder
 $('#lReq').onclick=()=>openReq(LIST.slice());
 // a piece opened from the shortlist: bring it into view first if the filters hide it
 function showPiece(i){const it=IT[i];if(!it.m){F.fam.clear();F.room.clear();F.wood.clear();F.lo=0;F.hi=1;syncPyr();syncWheel();onFilter()}
- setTimeout(()=>{V.px=-it.x*V.z;V.py=-it.y*V.z;clampPan();setWorld(true);cull();setTimeout(()=>openDetail(i),RM?0:650)},it.m?0:500)}
+ setTimeout(()=>{V.px=-it.x*V.z;V.py=-it.y*V.z;clampPan();setWorld(true);cull();setTimeout(()=>openDetail(i,it.el),RM?0:650)},it.m?0:500)}
 
 /* request brief, filled from the filters and the chosen pieces */
 let reqIds=[];
@@ -601,8 +633,8 @@ function briefText(){const f=$('#reqForm').elements,v=k=>f[k].value.trim();store
  L.push('','See them here',linkOf(reqIds));return L.join('\n')}
 $('#reqForm').onsubmit=e=>{e.preventDefault();wa(briefText())};
 $('#reqCopy').onclick=async()=>{const t=briefText();try{await navigator.clipboard.writeText(t);toast('Brief copied. Paste it into an email or a chat.')}catch(e){toast('Copy did not work in this browser.')}};
-document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
-document.querySelectorAll('dialog').forEach(dl=>dl.addEventListener('click',e=>{if(e.target===dl)dl.close()}));
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{const dl=b.closest('dialog');dl.id==='detail'?closeDetail():dl.close()});
+document.querySelectorAll('dialog').forEach(dl=>dl.addEventListener('click',e=>{if(e.target===dl)dl.id==='detail'?closeDetail():dl.close()}));
 
 /* data saver */
 function showSave(){const b=$('#saverBtn');b.setAttribute('aria-pressed',SAVE);b.title=SAVE?'Data saver is on':'Data saver'}
@@ -620,7 +652,7 @@ else welcome();
 /* offline cache on the public site, so a second visit costs no data for photos already seen */
 if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{measure();fitPanels();if(DI>=0)closeDetail();setWorld(false);cull()},150)});
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{measure();fitPanels();setWorld(false);cull()},150)});
 </script>
 </body>
 </html>
