@@ -44,7 +44,9 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .fine{margin-top:14px;font-size:12px;color:var(--muted)}
 
 /* stage */
-#stage{position:fixed;inset:0;z-index:10;overflow:hidden}
+#stage{position:fixed;inset:0;z-index:10;overflow:hidden;overflow-anchor:none}
+#stage.scroll{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.spacer{position:absolute;left:0;top:0;width:1px;pointer-events:none}
 .tile{position:absolute;left:0;top:0;width:220px;height:220px;overflow:hidden;background:var(--line);transform-origin:0 0;visibility:hidden;
 transition:transform 1s var(--ease),opacity .6s var(--ease),border-radius 1s var(--ease),visibility 1s;cursor:pointer;opacity:0}
 .th{display:block;width:100%;height:100%;background-size:800% 800%;background-color:var(--line)}
@@ -305,6 +307,18 @@ dialog{overflow:visible;margin:auto}
  .ans{flex-basis:140px;padding:11px 13px 10px}
  .ans-v{font-size:15.5px}
 }
+/* on a computer the piece opens like a photo page on Pexels: a tall panel over a dark backdrop, a bar on top, the whole photo below */
+@media (min-width:701px){
+ #detail{width:min(1040px,calc(100vw - 48px));max-width:none;height:calc(100dvh - 32px);max-height:none}
+ #detail::backdrop{background:rgba(21,17,13,.9);backdrop-filter:none}
+ #detail .dt{display:flex;flex-direction:column;height:100%;max-height:none;overflow:hidden}
+ .dt .tx{order:-1;display:grid;grid-template-columns:1fr auto;column-gap:20px;row-gap:2px;align-items:center;padding:18px 70px 16px 24px}
+ .dt .tx>*{grid-column:1}
+ .dt .tx .d-acts{grid-column:2;grid-row:1/4;margin:0}
+ .dt h3{font-size:26px}
+ .dt .ph{flex:1;min-height:0;aspect-ratio:auto;margin:0 24px 24px;background:none;container-type:size}
+ .dt .ph .th,.dt .ph .lgx{width:min(100cqw,100cqh);height:min(100cqw,100cqh);min-width:0;min-height:0;border-radius:8px}
+}
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;transition-delay:0s!important}
 }
@@ -463,15 +477,23 @@ function ranked(){return [...Array(N).keys()].map(i=>({i,s:score(i)})).sort((a,b
 const stage=$('#stage');const tiles=[];
 D.forEach((d,i)=>{const el=document.createElement('button');el.className='tile';el.setAttribute('aria-label',CATS[d[0]][0]+', open details');
  el.appendChild(thumbEl(i));el.onclick=()=>openDetail(i,el);el.onpointerdown=()=>{if(!SAVE)qLoad(i>>2)};el.onmouseenter=e=>showTip(i,el);el.onmouseleave=hideTip;el.onfocus=()=>showTip(i,el);el.onblur=hideTip;
- stage.appendChild(el);tiles.push({el,x:0,y:0,s:0,o:0})});
+ stage.appendChild(el);tiles.push({el,x:0,y:0,s:0,o:0,on:false})});
+const spacer=document.createElement('div');spacer.className='spacer';stage.appendChild(spacer);let GRID=false;
 function place(i,x,y,size,o,delay){const t=tiles[i],sc=size/220;t.x=x;t.y=y;t.s=size;
  t.el.style.transitionDelay=RM?'0s':delay+'ms';t.el.style.transform=`translate(${x}px,${y}px) scale(${sc})`;
- t.el.style.borderRadius=(Math.max(6,size*.08)/sc)+'px';t.el.style.opacity=o;t.el.style.visibility=o?'visible':'hidden';t.el.style.pointerEvents=o?'auto':'none';t.el.tabIndex=o?0:-1}
+ t.el.style.borderRadius=(Math.max(6,size*.08)/sc)+'px';t.on=!!o;t.el.style.opacity=o;t.el.style.visibility=o?'visible':'hidden';t.el.style.pointerEvents=o?'auto':'none';t.el.tabIndex=o?0:-1}
 function view(){const w=innerWidth,h=innerHeight,ch=130;return{w,h,cx:w/2,cy:Math.max(120,(h-ch-30)/2+20)}}
+// with no filters every piece sits in a grid you can scroll. Only rows near the screen are drawn, which keeps phones within memory
 function layoutGrid(){const {w,h}=view();const cols=w<700?4:Math.max(6,Math.round(w/165));const gap=w<700?8:12;const sz=(w-gap*(cols+1))/cols;
- const rows=Math.ceil(h/(sz+gap))+1;let k=0;
- mixOrder.forEach((i,n)=>{const r=Math.floor(n/cols),c=n%cols;if(r<rows){place(i,gap+c*(sz+gap),70+r*(sz+gap),sz,1,Math.min(n*6,500))}else place(i,w/2-10,h+40,20,0,0)})}
-function layoutCloud(){const {w,h,cx,cy}=view();const base=Math.min(w,h*1.25);const big=Math.max(84,base*(w<700?.27:.17)),small=Math.max(26,base*(w<700?.075:.05));
+ GRID=true;stage.classList.add('scroll');spacer.style.height=(70+Math.ceil(N/cols)*(sz+gap)+150)+'px';const top=stage.scrollTop;let k=0;
+ mixOrder.forEach((i,n)=>{const r=Math.floor(n/cols),c=n%cols,y=70+r*(sz+gap),on=y+sz>top-h*.5&&y<top+h*1.5;place(i,gap+c*(sz+gap),y,sz,on?1:0,on?Math.min((k++)*6,500):0)})}
+function gridVis(){if(!GRID)return;const top=stage.scrollTop,h=innerHeight;
+ tiles.forEach(t=>{const on=t.y+t.s>top-h*.5&&t.y<top+h*1.5;if(on===t.on)return;t.on=on;const e=t.el.style;e.transitionDelay='0s';e.opacity=on?1:0;e.visibility=on?'visible':'hidden';e.pointerEvents=on?'auto':'none';t.el.tabIndex=on?0:-1})}
+let sRaf=0;stage.addEventListener('scroll',()=>{if(!GRID&&stage.scrollTop){stage.scrollTop=0;return}hideTip();if(!sRaf)sRaf=requestAnimationFrame(()=>{sRaf=0;gridVis()})},{passive:true});
+function leaveGrid(){if(!GRID)return;GRID=false;const st=stage.scrollTop;
+ if(st){tiles.forEach(t=>{t.el.style.transition='none';t.y-=st;t.el.style.transform=`translate(${t.x}px,${t.y}px) scale(${t.s/220})`});stage.scrollTop=0;void stage.offsetWidth;tiles.forEach(t=>t.el.style.transition='')}
+ stage.classList.remove('scroll');spacer.style.height='0px'}
+function layoutCloud(){leaveGrid();const {w,h,cx,cy}=view();const base=Math.min(w,h*1.25);const big=Math.max(84,base*(w<700?.27:.17)),small=Math.max(26,base*(w<700?.075:.05));
  const R=ranked();const pts=[];let area=0;const gap=w<700?5:8;
  R.forEach((r,k)=>{const f=Math.pow(Math.max(0,r.s),2.4)*(1/(1+k/16));const size=small+(big-small)*f;area+=(size+gap)*(size+gap);
   const rad=k===0?0:Math.sqrt(area/Math.PI)*.92;const a=k*2.39996;pts.push({i:r.i,x:Math.cos(a)*rad*(w>h?1.25:1),y:Math.sin(a)*rad*.9,r:size/2+gap/2,size})});
@@ -540,7 +562,7 @@ function openDetail(i,src){if(dBusy)return;if(PN){closePanel();return}hideTip();
  $('#dBy').textContent='';$('#dCode').textContent=code(i)+'. Quote this number when you ask about it.';$('#dFull').classList.toggle('hide',!SAVE);updSave();
  const dlg=$('#detail');dlg.showModal();if(RM||!dSrc)return;
  // grow the panel out of the tile and fly the photo from the tile to its place
- dBusy=true;const from=dSrc.getBoundingClientRect(),ph=dlg.querySelector('.ph'),to=ph.getBoundingClientRect(),box=dlg.getBoundingClientRect();
+ dBusy=true;const from=dSrc.getBoundingClientRect(),ph=dlg.querySelector('.ph'),to=(ph.querySelector('.lgx')||ph).getBoundingClientRect(),box=dlg.getBoundingClientRect();
  const fly=flyer(i,from);mount(fly,dlg);ph.style.visibility='hidden';dSrc.style.visibility='hidden';
  const E={duration:720,easing:'cubic-bezier(.16,1,.3,1)',fill:'both'};
  fly.animate([rectKF(from,14),rectKF(to,0)],E);
@@ -557,7 +579,7 @@ function closeDetail(){const dlg=$('#detail');if(dBusy)return;const src=dSrc;dSr
  if(RM||!src||!src.isConnected){fin();return}
  const from=src.getBoundingClientRect();const onScreen=from.width>4&&from.bottom>0&&from.top<innerHeight&&from.right>0&&from.left<innerWidth;
  if(!onScreen){fin();return}
- dBusy=true;const ph=dlg.querySelector('.ph'),to=ph.getBoundingClientRect(),box=dlg.getBoundingClientRect();
+ dBusy=true;const ph=dlg.querySelector('.ph'),to=(ph.querySelector('.lgx')||ph).getBoundingClientRect(),box=dlg.getBoundingClientRect();
  const fly=flyer(dIdx,to);mount(fly,dlg);ph.style.visibility='hidden';
  const E={duration:560,easing:'cubic-bezier(.7,0,.2,1)',fill:'both'};
  dlg.querySelector('.tx').animate([{opacity:1},{opacity:0}],{duration:200,fill:'both'});
