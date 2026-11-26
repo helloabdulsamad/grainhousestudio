@@ -66,7 +66,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 #stage{position:fixed;inset:0;z-index:10;overflow:hidden;overflow-anchor:none}
 #stage.scroll{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .spacer{position:absolute;left:0;top:0;width:1px;pointer-events:none}
-.tile{position:absolute;left:0;top:0;width:220px;height:220px;overflow:hidden;background:var(--line);transform-origin:0 0;visibility:hidden;
+.tile{position:absolute;left:0;top:0;width:var(--tb,220px);height:var(--tb,220px);overflow:hidden;background:var(--line);transform-origin:0 0;visibility:hidden;
 transition:transform 1s var(--ease),opacity .6s var(--ease),border-radius 1s var(--ease),visibility 1s;cursor:pointer;opacity:0}
 .th{display:block;width:100%;height:100%;background-size:800% 800%;background-color:var(--line)}
 .tile img{opacity:0;transition:opacity .5s}
@@ -194,7 +194,8 @@ transform:rotate(-100deg);opacity:0;transition:transform .28s var(--e) var(--c),
 .ready.res .achips{opacity:0;pointer-events:none;transition-delay:0s}
 @media (hover:hover) and (pointer:fine){.bar button:hover,.pc:hover,#back:hover{color:#fff;background:var(--red);border-color:var(--redb)}.sw-b:hover{transform:scale(1.04)}}
 .bar button:active,.pc:active{color:#fff;background:var(--reda);border-color:var(--redb)}
-@media (max-width:700px){.bar button{width:68px;font-size:12px}.bar button.has::after{right:5px}.pc{width:84px;font-size:12px}}
+@media (max-width:700px){
+ dialog::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}.bar button{width:68px;font-size:12px}.bar button.has::after{right:5px}.pc{width:84px;font-size:12px}}
 
 /* preparing */
 #prep{position:fixed;inset:0;z-index:45;background:var(--sawdust);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .5s}
@@ -507,7 +508,10 @@ D.forEach((d,i)=>{const el=document.createElement('button');el.className='tile';
  el.appendChild(thumbEl(i));el.onclick=()=>openDetail(i,el);el.onpointerdown=()=>warm(i);el.onmouseenter=e=>{showTip(i,el);warm(i)};el.onmouseleave=hideTip;el.onfocus=()=>showTip(i,el);el.onblur=hideTip;
  stage.appendChild(el);tiles.push({el,x:0,y:0,s:0,o:0,on:false})});
 const spacer=document.createElement('div');spacer.className='spacer';stage.appendChild(spacer);let GRID=false;
-function place(i,x,y,size,o,delay){const t=tiles[i],sc=size/220;t.x=x;t.y=y;t.s=size;
+// tiles are built at the largest size they are shown at, then scaled down. On phones that is 120 px, so each moving tile
+// costs the phone about a third of the memory a 220 px tile did. Safari closes the page when moving tiles use too much
+const TB=innerWidth<700?120:220;document.documentElement.style.setProperty('--tb',TB+'px');
+function place(i,x,y,size,o,delay){const t=tiles[i],sc=size/TB;t.x=x;t.y=y;t.s=size;
  t.el.style.transitionDelay=RM?'0s':delay+'ms';t.el.style.transform=`translate(${x}px,${y}px) scale(${sc})`;
  t.el.style.borderRadius=(Math.max(6,size*.08)/sc)+'px';t.on=!!o;t.el.style.opacity=o;t.el.style.visibility=o?'visible':'hidden';t.el.style.pointerEvents=o?'auto':'none';t.el.tabIndex=o?0:-1}
 function view(){const w=innerWidth,h=innerHeight,ch=130;return{w,h,cx:w/2,cy:Math.max(120,(h-ch-30)/2+20)}}
@@ -519,7 +523,7 @@ function gridVis(){if(!GRID)return;const top=stage.scrollTop,h=innerHeight;
  tiles.forEach(t=>{const on=t.y+t.s>top-h*.5&&t.y<top+h*1.5;if(on===t.on)return;t.on=on;const e=t.el.style;e.transitionDelay='0s';e.opacity=on?1:0;e.visibility=on?'visible':'hidden';e.pointerEvents=on?'auto':'none';t.el.tabIndex=on?0:-1})}
 let sRaf=0;stage.addEventListener('scroll',()=>{if(!GRID&&stage.scrollTop){stage.scrollTop=0;return}hideTip();if(!sRaf)sRaf=requestAnimationFrame(()=>{sRaf=0;gridVis()})},{passive:true});
 function leaveGrid(){if(!GRID)return;GRID=false;const st=stage.scrollTop;
- if(st){tiles.forEach(t=>{t.el.style.transition='none';t.y-=st;t.el.style.transform=`translate(${t.x}px,${t.y}px) scale(${t.s/220})`});stage.scrollTop=0;void stage.offsetWidth;tiles.forEach(t=>t.el.style.transition='')}
+ if(st){tiles.forEach(t=>{t.el.style.transition='none';t.y-=st;t.el.style.transform=`translate(${t.x}px,${t.y}px) scale(${t.s/TB})`});stage.scrollTop=0;void stage.offsetWidth;tiles.forEach(t=>t.el.style.transition='')}
  stage.classList.remove('scroll');spacer.style.height='0px'}
 function layoutCloud(){leaveGrid();const {w,h,cx,cy}=view();const base=Math.min(w,h*1.25);const big=Math.max(84,base*(w<700?.27:.17)),small=Math.max(26,base*(w<700?.075:.05));
  const R=ranked();const pts=[];let area=0;const gap=w<700?5:8;
@@ -556,7 +560,7 @@ function stopIntro(){removeEventListener('resize',onWz);removeEventListener('poi
 
 
 /* start */
-$('#startBtn').onclick=()=>{$('#intro').classList.add('out');setTimeout(stopIntro,800);
+$('#startBtn').onclick=()=>{$('#intro').classList.add('out');setTimeout(()=>{stopIntro();$('#intro').style.display='none'},800);
  const {w,h}=view();tiles.forEach((t,i)=>place(i,w/2-30,h/2-30,60,0,0));
  requestAnimationFrame(()=>requestAnimationFrame(()=>{READY=true;document.body.classList.add('ready');$('#restartTop').classList.remove('hide');renderActive();layout()}))};
 
@@ -812,8 +816,11 @@ showSave();
 /* open a shared link */
 const fromLink=applyHash();
 saveList();
-if(fromLink&&(fromLink.any||fromLink.got)){$('#intro').classList.add('out');stopIntro();$('#restartTop').classList.remove('hide');READY=true;document.body.classList.add('ready');syncPyr();syncWheel();drawDial();renderActive();
- if(fromLink.any){layout();renderResults();$('#res').classList.add('on');document.body.classList.add('res')}else{layout();openList()}}
+if(fromLink&&(fromLink.any||fromLink.got)){$('#intro').classList.add('out');stopIntro();$('#intro').style.display='none';$('#restartTop').classList.remove('hide');READY=true;document.body.classList.add('ready');syncPyr();syncWheel();drawDial();renderActive();
+ // a shared link opens on the matches. A reload in the same tab, for example after the phone closed the page, goes back to the grid with the picks kept
+ const again=(()=>{try{return sessionStorage.getItem('gh-here')}catch(e){return null}})();
+ if(fromLink.any&&!again){layout();renderResults();$('#res').classList.add('on');document.body.classList.add('res')}else if(fromLink.any){layout()}else{layout();openList()}}
+try{sessionStorage.setItem('gh-here','1')}catch(e){}
 
 /* offline cache on the public site, so a second visit costs no data for photos already seen */
 if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window)navigator.serviceWorker.register('sw.js').catch(()=>{});
